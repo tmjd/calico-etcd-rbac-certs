@@ -121,9 +121,9 @@ SCRIPT
 
       if i == 1
         # Configure the master.
-        host.vm.provision :file, :source => "certs/ca.pem", :destination => "/tmp/certs/ca.crt"
-        host.vm.provision :file, :source => "certs/etcd#{i}-key.pem", :destination => "/tmp/certs/member.key"
-        host.vm.provision :file, :source => "certs/etcd#{i}.pem", :destination => "/tmp/certs/member.crt"
+        host.vm.provision :file, :source => "tls-setup/certs/ca.pem", :destination => "/tmp/certs/ca.crt"
+        host.vm.provision :file, :source => "tls-setup/certs/etcd#{i}-key.pem", :destination => "/tmp/certs/member.key"
+        host.vm.provision :file, :source => "tls-setup/certs/etcd#{i}.pem", :destination => "/tmp/certs/member.crt"
 
         host.vm.provision :shell, :inline => "sudo mv /tmp/certs/* /etc/etcd"
         host.vm.provision :shell, :inline => "sudo chown root /etc/etcd/*; sudo chmod 777 /etc/etcd/*"
@@ -139,9 +139,9 @@ SCRIPT
         host.vm.provision :shell, :inline => "mkdir -p /etc/kubernetes/manifests/", :privileged => true
       else
         # Configure a node.
-        host.vm.provision :file, :source => "certs/ca.pem", :destination => "/tmp/certs/ca.crt"
-        host.vm.provision :file, :source => "certs/proxy1-key.pem", :destination => "/tmp/certs/proxy.key"
-        host.vm.provision :file, :source => "certs/proxy1.pem", :destination => "/tmp/certs/proxy.crt"
+        host.vm.provision :file, :source => "tls-setup/certs/ca.pem", :destination => "/tmp/certs/ca.crt"
+        host.vm.provision :file, :source => "tls-setup/certs/proxy1-key.pem", :destination => "/tmp/certs/proxy.key"
+        host.vm.provision :file, :source => "tls-setup/certs/proxy1.pem", :destination => "/tmp/certs/proxy.crt"
         host.vm.provision :shell, :inline => "sudo mv /tmp/certs/* /etc/etcd"
         host.vm.provision :shell, :inline => "sudo chown root /etc/etcd/*; sudo chmod 777 /etc/etcd/*"
 
