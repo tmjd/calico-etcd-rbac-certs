@@ -1,0 +1,5 @@
+\.vagrant
+k8s/*
+.*\.swp
+tls-setup/certs
+tmp/
