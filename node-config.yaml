@@ -51,7 +51,7 @@ coreos:
               --trusted-ca-file=/etc/etcd/ca.crt \
               --cert-file=/etc/etcd/proxy.crt \
               --key-file=/etc/etcd/proxy.key \
-              --initial-cluster=etcdserver1=https://172.18.18.101:2380,etcdserver2=https://172.18.18.102:2380,etcdserver3=https://172.18.18.103:2380
+              --initial-cluster=etcdserver1=https://172.18.18.101:2380
             Environment="ETCD_IMAGE_TAG=v3.0.12"
     - name: kubelet.service
       runtime: true
@@ -71,7 +71,7 @@ coreos:
         ExecStart=/opt/bin/kubelet \
         --address=0.0.0.0 \
         --allow-privileged=true \
-        --api-servers=http://172.18.18.101:8080,http://172.18.18.102:8080,http://172.18.18.103:8080 \
+        --api-servers=http://172.18.18.101:8080 \
         --cluster-dns=10.100.0.10 \
         --cluster-domain=cluster.local \
         --hostname-override=$private_ipv4 \

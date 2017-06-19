@@ -1,5 +1,5 @@
 # Size of the cluster created by Vagrant
-num_instances=4
+num_instances=2
 
 # Change basename of the VM
 instance_name_prefix="k8s-node"
@@ -119,7 +119,7 @@ SCRIPT
       host.vm.provision :shell, :inline => "sudo mkdir -p /etc/etcd"
       host.vm.provision :shell, :inline => "sudo mkdir -p /tmp/certs; sudo chmod -R 777 /tmp/certs"
 
-      if i <= 3
+      if i == 1
         # Configure the master.
         host.vm.provision :file, :source => "certs/ca.pem", :destination => "/tmp/certs/ca.crt"
         host.vm.provision :file, :source => "certs/etcd#{i}-key.pem", :destination => "/tmp/certs/member.key"
