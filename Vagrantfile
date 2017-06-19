@@ -1,5 +1,5 @@
 # Size of the cluster created by Vagrant
-num_instances=3
+num_instances=4
 
 # Change basename of the VM
 instance_name_prefix="k8s-node"
@@ -116,16 +116,35 @@ SCRIPT
       host.vm.provision :shell, :inline => "echo '#{$init_k8s}' > /opt/k8s/setup/k8s_binary_init.sh"
       host.vm.provision :shell, :inline => "sudo chmod +x /opt/k8s/setup/*"
 
+      host.vm.provision :shell, :inline => "sudo mkdir -p /etc/etcd"
+      host.vm.provision :shell, :inline => "sudo mkdir -p /tmp/certs; sudo chmod -R 777 /tmp/certs"
 
-      if i == 1
+      if i <= 3
         # Configure the master.
+        host.vm.provision :file, :source => "certs/ca.pem", :destination => "/tmp/certs/ca.crt"
+        host.vm.provision :file, :source => "certs/etcd#{i}-key.pem", :destination => "/tmp/certs/member.key"
+        host.vm.provision :file, :source => "certs/etcd#{i}.pem", :destination => "/tmp/certs/member.crt"
+
+        host.vm.provision :shell, :inline => "sudo mv /tmp/certs/* /etc/etcd"
+        host.vm.provision :shell, :inline => "sudo chown root /etc/etcd/*; sudo chmod 777 /etc/etcd/*"
+        #host.vm.provision :shell, :inline => "sudo mkdir -p /var/run/kubernetes"
+        #host.vm.provision :shell, :inline => "sudo cp /etc/etcd/member.key /var/run/kubernetes/apiserver.key"
+        #host.vm.provision :shell, :inline => "sudo cp /etc/etcd/member.crt /var/run/kubernetes/apiserver.crt"
+
         host.vm.provision :file, :source => "master-config.yaml", :destination => "/tmp/vagrantfile-user-data"
+        host.vm.provision :shell, :inline => "sed -i -e 's|__ID__|#{i}|g' /tmp/vagrantfile-user-data"
         host.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
 
         host.vm.provision :shell, :inline => "echo '127.0.0.1\tlocalhost' > /etc/hosts", :privileged => true
         host.vm.provision :shell, :inline => "mkdir -p /etc/kubernetes/manifests/", :privileged => true
       else
         # Configure a node.
+        host.vm.provision :file, :source => "certs/ca.pem", :destination => "/tmp/certs/ca.crt"
+        host.vm.provision :file, :source => "certs/proxy1-key.pem", :destination => "/tmp/certs/proxy.key"
+        host.vm.provision :file, :source => "certs/proxy1.pem", :destination => "/tmp/certs/proxy.crt"
+        host.vm.provision :shell, :inline => "sudo mv /tmp/certs/* /etc/etcd"
+        host.vm.provision :shell, :inline => "sudo chown root /etc/etcd/*; sudo chmod 777 /etc/etcd/*"
+
         host.vm.provision :file, :source => "node-config.yaml", :destination => "/tmp/vagrantfile-user-data"
         host.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
       end
