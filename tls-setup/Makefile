@@ -45,6 +45,11 @@ req:
 	  -ca-key certs/ca-key.pem \
 	  -config config/ca-config.json \
 	  config/req-calico.json | $(JSON) -bare certs/calico
+	$(CFSSL) gencert \
+	  -ca certs/ca.pem \
+	  -ca-key certs/ca-key.pem \
+	  -config config/ca-config.json \
+	  config/csr-k8s.json | $(JSON) -bare certs/kubernetes
 
 
 clean:

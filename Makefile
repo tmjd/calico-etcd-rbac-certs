@@ -1,7 +1,10 @@
 .PHONY: clean
 
-all: certs
-	vagrant up
+NODES ?= 2
+
+all: tls-setup/certs
+	sed -i -e 's/^num_instances=.*$$/num_instances=$(NODES)/' Vagrantfile
+	K8S_CACHED=true ./vagrant_up.sh
 
 tls-setup/certs:
 	cd tls-setup; make

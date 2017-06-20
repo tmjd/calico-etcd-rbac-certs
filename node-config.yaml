@@ -49,13 +49,13 @@ coreos:
             Environment="ETCD_OPTS=--proxy on --listen-client-urls https://127.0.0.1:2379 \
               --client-cert-auth \
               --trusted-ca-file=/etc/etcd/ca.crt \
-              --cert-file=/etc/etcd/proxy.crt \
-              --key-file=/etc/etcd/proxy.key \
+              --cert-file=/etc/etcd/etcd-proxy.crt \
+              --key-file=/etc/etcd/etcd-proxy.key \
               --initial-cluster=etcdserver1=https://172.18.18.101:2380
-            Environment="ETCD_IMAGE_TAG=v3.0.12"
+            Environment="ETCD_IMAGE_TAG=v3.2.0"
     - name: kubelet.service
       runtime: true
-      command: start
+      command: stop
       content: |
         [Unit]
         Description=Kubernetes Kubelet
@@ -84,7 +84,7 @@ coreos:
         WantedBy=multi-user.target
 
     - name: kube-proxy.service
-      command: start
+      command: stop
       content: |
         [Unit]
         Description=Kubernetes Proxy

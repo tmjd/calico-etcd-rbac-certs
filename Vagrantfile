@@ -119,17 +119,18 @@ SCRIPT
       host.vm.provision :shell, :inline => "sudo mkdir -p /etc/etcd"
       host.vm.provision :shell, :inline => "sudo mkdir -p /tmp/certs; sudo chmod -R 777 /tmp/certs"
 
+      # Get K8s certs ready for access to etcd
+      host.vm.provision :file, :source => "tls-setup/certs/kubernetes-key.pem", :destination => "/tmp/certs/kubernetes.key"
+      host.vm.provision :file, :source => "tls-setup/certs/kubernetes.pem", :destination => "/tmp/certs/kubernetes.crt"
+
       if i == 1
         # Configure the master.
         host.vm.provision :file, :source => "tls-setup/certs/ca.pem", :destination => "/tmp/certs/ca.crt"
-        host.vm.provision :file, :source => "tls-setup/certs/etcd#{i}-key.pem", :destination => "/tmp/certs/member.key"
-        host.vm.provision :file, :source => "tls-setup/certs/etcd#{i}.pem", :destination => "/tmp/certs/member.crt"
+        host.vm.provision :file, :source => "tls-setup/certs/etcd#{i}-key.pem", :destination => "/tmp/certs/etcd-member.key"
+        host.vm.provision :file, :source => "tls-setup/certs/etcd#{i}.pem", :destination => "/tmp/certs/etcd-member.crt"
 
         host.vm.provision :shell, :inline => "sudo mv /tmp/certs/* /etc/etcd"
         host.vm.provision :shell, :inline => "sudo chown root /etc/etcd/*; sudo chmod 777 /etc/etcd/*"
-        #host.vm.provision :shell, :inline => "sudo mkdir -p /var/run/kubernetes"
-        #host.vm.provision :shell, :inline => "sudo cp /etc/etcd/member.key /var/run/kubernetes/apiserver.key"
-        #host.vm.provision :shell, :inline => "sudo cp /etc/etcd/member.crt /var/run/kubernetes/apiserver.crt"
 
         host.vm.provision :file, :source => "master-config.yaml", :destination => "/tmp/vagrantfile-user-data"
         host.vm.provision :shell, :inline => "sed -i -e 's|__ID__|#{i}|g' /tmp/vagrantfile-user-data"
@@ -140,8 +141,8 @@ SCRIPT
       else
         # Configure a node.
         host.vm.provision :file, :source => "tls-setup/certs/ca.pem", :destination => "/tmp/certs/ca.crt"
-        host.vm.provision :file, :source => "tls-setup/certs/proxy1-key.pem", :destination => "/tmp/certs/proxy.key"
-        host.vm.provision :file, :source => "tls-setup/certs/proxy1.pem", :destination => "/tmp/certs/proxy.crt"
+        host.vm.provision :file, :source => "tls-setup/certs/proxy1-key.pem", :destination => "/tmp/certs/etcd-proxy.key"
+        host.vm.provision :file, :source => "tls-setup/certs/proxy1.pem", :destination => "/tmp/certs/etcd-proxy.crt"
         host.vm.provision :shell, :inline => "sudo mv /tmp/certs/* /etc/etcd"
         host.vm.provision :shell, :inline => "sudo chown root /etc/etcd/*; sudo chmod 777 /etc/etcd/*"
 
