@@ -63,15 +63,26 @@ data:
   # not using TLS for etcd.
   # This self-hosted install expects three files with the following names.  The values
   # should be base64 encoded strings of the entire contents of each file.
-  etcd-key: |
-    calico-etcd-rbac-key
+  etcd-key: calico-etcd-rbac-key
 
-  etcd-cert: |
-    calico-etcd-rbac-cert
+  etcd-cert: calico-etcd-rbac-cert
 
-  etcd-ca: |
-    calico-etcd-rbac-ca
+  etcd-ca: calico-etcd-rbac-ca
 
+---
+
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: calico-cni-etcd-secrets
+  namespace: kube-system
+data:
+  etcd-key: calico-cni-etcd-rbac-key
+
+  etcd-cert: calico-cni-etcd-rbac-cert
+
+  etcd-ca: calico-etcd-rbac-ca
 
 ---
 
@@ -201,7 +212,7 @@ spec:
             - mountPath: /host/etc/cni/net.d
               name: cni-net-dir
             - mountPath: /calico-secrets
-              name: etcd-certs
+              name: cni-etcd-certs
       volumes:
         # Used by calico/node.
         - name: lib-modules
@@ -218,9 +229,12 @@ spec:
           hostPath:
             path: /etc/cni/net.d
         # Mount in the etcd TLS secrets.
+        - name: cni-etcd-certs
+          secret:
+            secretName: calico-cni-etcd-secrets
         - name: etcd-certs
-          configMap:
-            name: calico-etcd-secrets
+          secret:
+            secretName: calico-etcd-secrets
 
 ---
 
@@ -303,8 +317,8 @@ spec:
       volumes:
         # Mount in the etcd TLS secrets.
         - name: etcd-certs
-          configMap:
-            name: calico-etcd-secrets
+          secret:
+            secretName: calico-etcd-secrets
 
 ---
 

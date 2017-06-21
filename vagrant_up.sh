@@ -46,6 +46,11 @@ create_etcd_users_and_roles()
     $etcd_cmd role grant calico -readwrite -path '/calico*'
     $etcd_cmd user grant calico -roles calico
 
+    $etcd_cmd user add calico-cni:notGoodPw
+    $etcd_cmd role add calico-cni
+    $etcd_cmd role grant calico-cni -readwrite -path '/calico*'
+    $etcd_cmd user grant calico-cni -roles calico-cni
+
     $etcd_cmd user add testUser:notGoodPw
     $etcd_cmd role add testRole
     $etcd_cmd role grant testRole -readwrite -path '/test*'

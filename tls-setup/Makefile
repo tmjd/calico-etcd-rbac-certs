@@ -44,12 +44,17 @@ req:
 	  -ca certs/ca.pem \
 	  -ca-key certs/ca-key.pem \
 	  -config config/ca-config.json \
+	  config/req-k8s.json | $(JSON) -bare certs/kubernetes
+	$(CFSSL) gencert \
+	  -ca certs/ca.pem \
+	  -ca-key certs/ca-key.pem \
+	  -config config/ca-config.json \
 	  config/req-calico.json | $(JSON) -bare certs/calico
 	$(CFSSL) gencert \
 	  -ca certs/ca.pem \
 	  -ca-key certs/ca-key.pem \
 	  -config config/ca-config.json \
-	  config/csr-k8s.json | $(JSON) -bare certs/kubernetes
+	  config/req-calico-cni.json | $(JSON) -bare certs/calico-cni
 
 
 clean:
