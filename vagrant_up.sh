@@ -16,8 +16,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-ssh_01="vagrant ssh k8s-master"
-hosts="k8s-master k8s-node-01"
+hosts=""
+for ((n=1;n<=$MASTERS;n++)); do hosts="$hosts k8s-master-0$n"; done
+for ((n=1;n<=$NODES;n++)); do hosts="$hosts k8s-node-0$n"; done
+host_count=$(($MASTERS+$NODES))
 
 wait_for_pods_running()
 {
@@ -55,7 +57,7 @@ create_etcd_users_and_roles()
     $etcd3_cmd user add kubetcd:notGoodPw
     $etcd3_cmd role add kubetcd
     $etcd3_cmd role grant-permission kubetcd --prefix=true readwrite /registry
-    $etcd3_cmd role grant-permission kubetcd --prefix=true readwrite registry
+    #$etcd3_cmd role grant-permission kubetcd --prefix=true readwrite registry
     $etcd3_cmd user grant-role kubetcd kubetcd
 
     $etcd3_cmd user add testUser:notGoodPw
@@ -66,6 +68,7 @@ create_etcd_users_and_roles()
 
     $etcd3_cmd auth enable
     unset ETCDCTL_API
+    # Need both enables, only doing the etcd v3 does not lock down the v2
     $etcd_cmd auth enable
 }
 
@@ -116,7 +119,6 @@ fi
 
 for x in $hosts; do
     vagrant ssh $x -c 'ping -c 3 172.18.18.102 && ping -c 3 172.18.18.101'
-    #vagrant ssh $x -c 'ping -c 3 172.18.18.102 && ping -c 3 172.18.18.101 && ping -c 3 172.18.18.103'
     if [ $? -ne 0 ]; then echo "Failed pings from $x"; exit 1; fi
     vagrant ssh $x -c 'curl -L http://172.18.18.101:2379/version'
     if [ $? -ne 0 ]; then echo "Failed to curl etcd $x"; exit 1; fi
@@ -130,8 +132,8 @@ kubectl config set-cluster vagrant-cluster --server=http://172.18.18.101:8080
 kubectl config set-context vagrant-system --cluster=vagrant-cluster
 kubectl config use-context vagrant-system
 
-while [ $(kubectl get nodes | tail -n +2 | wc -l) -ne $NODES ]; do
-	sleep 2
+while [ $(kubectl get nodes | tail -n +2 | wc -l) -ne $host_count ]; do
+	sleep 5
 	echo 'Waiting for nodes to work'
 done
 

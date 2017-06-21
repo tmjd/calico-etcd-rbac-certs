@@ -1,5 +1,5 @@
 # Size of the cluster created by Vagrant
-num_instances=2
+num_instances=3
 
 # Change basename of the VM
 instance_name_prefix="k8s-node"
@@ -97,7 +97,7 @@ SCRIPT
   # Set up each box
   (1..num_instances).each do |i|
     if i == 1
-      vm_name = "k8s-master"
+      vm_name = "k8s-master-01"
     else
       vm_name = "%s-%02d" % [instance_name_prefix, i-1]
     end
