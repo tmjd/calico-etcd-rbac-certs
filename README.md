@@ -23,6 +23,7 @@
 |----------------------------|--------|-------|
 | /calico/v1/host            |   RW   |  Writes out WEPs     |
 | /calico/v1/policy          |   RW   |  Writes out default policy     |
+| /calico/v1/ipam            |   R    |  Read IP pools (in IPAM allocation)     |
 | /calico/ipam/v2            |   RW   |  Allocates IP addresses / If using calico IPAM    |
 
 
