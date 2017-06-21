@@ -43,7 +43,7 @@ coreos:
               --listen-peer-urls=https://0.0.0.0:2380"
             Environment="ETCD_IMAGE_TAG=v3.2.0"
     - name: kube-apiserver.service
-      command: stop
+      command: start
       content: |
         [Unit]
         Description=Kubernetes API Server
@@ -68,7 +68,7 @@ coreos:
         RestartSec=10
 
     - name: kube-controller-manager.service
-      command: stop
+      command: start
       content: |
         [Unit]
         Description=Kubernetes Controller Manager
@@ -89,7 +89,7 @@ coreos:
         RestartSec=10
 
     - name: kube-scheduler.service
-      command: stop
+      command: start
       content: |
         [Unit]
         Description=Kubernetes Scheduler
@@ -104,7 +104,7 @@ coreos:
 
     - name: kubelet.service
       runtime: true
-      command: stop
+      command: start
       content: |
         [Unit]
         Description=Kubernetes Kubelet
@@ -131,7 +131,7 @@ coreos:
         WantedBy=multi-user.target
 
     - name: kube-proxy.service
-      command: stop
+      command: start
       content: |
         [Unit]
         Description=Kubernetes Proxy

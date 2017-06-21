@@ -75,13 +75,17 @@ etcd_calico_cmd='etcdctl --endpoints https://172.18.18.101:2379 --ca-file tls-se
 etcd3_k8s_cmd='etcdctl --endpoints https://172.18.18.101:2379 --cacert tls-setup/certs/ca.pem --cert tls-setup/certs/kubernetes.pem --key tls-setup/certs/kubernetes-key.pem'
 check_etcd_perms()
 {
+    echo "==Check Test user can't access /calico"
     $etcd_test_cmd ls /calico
     if [ $? -eq 0 ]; then echo "Test user could access /calico when it should not have"; exit 1; fi
+    echo "==Check Calico user can access /calico"
     $etcd_calico_cmd ls /calico
     if [ $? -ne 0 ]; then echo "Calico user could not access /calico when it should have"; exit 1; fi
     export ETCDCTL_API=3
+    echo "==Check test user can't access (v3)/registry"
     $etcd3_test_cmd get /registry
     if [ $? -eq 0 ]; then echo "Test user could access /registry when it should not have"; exit 1; fi
+    echo "==Check kubernetes user can access (v3)/registry"
     $etcd3_k8s_cmd get /registry
     if [ $? -ne 0 ]; then echo "K8s user could not access /registry when it should have"; exit 1; fi
     unset ETCDCTL_API
@@ -122,14 +126,11 @@ done
 
 create_etcd_users_and_roles
 
-vagrant ssh k8s-master -c 'sudo systemctl start kube-apiserver kubelet kube-controller-manager kube-proxy kube-scheduler'
-vagrant ssh k8s-node-01 -c 'sudo systemctl start kubelet kube-proxy'
-
 kubectl config set-cluster vagrant-cluster --server=http://172.18.18.101:8080
 kubectl config set-context vagrant-system --cluster=vagrant-cluster
 kubectl config use-context vagrant-system
 
-while [ $(kubectl get nodes | wc -l) -ne 3 ]; do
+while [ $(kubectl get nodes | tail -n +2 | wc -l) -ne $NODES ]; do
 	sleep 2
 	echo 'Waiting for nodes to work'
 done
