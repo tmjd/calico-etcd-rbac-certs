@@ -12,19 +12,6 @@ all: calico-certs
 tls-setup/certs:
 	rm -rf tmp
 	cd tls-setup; make
-	# Update calico manifest
-
-	#mkdir -p tmp
-	#cat tls-setup/certs/calico.pem | base64 | sed -e 's/^/    /' tmp/calico.pem
-	#cat tls-setup/certs/calico-key.pem | base64 | sed -e 's/^/    /' tmp/calico-key.pem
-	#cat tls-setup/certs/ca.pem | base64 | sed -e 's/^/    /' tmp/ca.pem
-	#cp calico.yaml.template k8s/calico.yaml
-	#sed -i -e '/calico-etcd-rbac-ca/r./tmp/ca.pem' k8s/calico.yaml
-	#sed -i -e '/calico-etcd-rbac-key/r./tmp/calico-key.pem' k8s/calico.yaml
-	#sed -i -e '/calico-etcd-rbac-cert/r./tmp/calico.pem' k8s/calico.yaml
-	#sed -i -e '/calico-cni-etcd-rbac-key/r./tmp/calico-cni-key.pem' k8s/calico.yaml
-	#sed -i -e '/calico-cni-etcd-rbac-cert/r./tmp/calico-cni.pem' k8s/calico.yaml
-	# Remove all the markers that were used above
 
 .PHONY: calico-certs
 calico-certs: tls-setup/certs k8s/calico.yaml tmp $(etcd-users)

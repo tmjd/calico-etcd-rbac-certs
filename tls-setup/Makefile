@@ -3,7 +3,7 @@
 CFSSL	= @env PATH=$(GOPATH)/bin:$(PATH) cfssl
 JSON	= env PATH=$(GOPATH)/bin:$(PATH) cfssljson
 
-ADDL_CERTS := calico calico-cni calico-k8s-policy
+ADDL_CERTS := calico calico-cni calico-k8s-policy root blah
 
 
 all: cfssl ca req $(ADDL_CERTS)

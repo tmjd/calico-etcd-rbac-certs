@@ -34,53 +34,12 @@ wait_for_pods_running()
 	done
 }
 
-etcd_cmd='etcdctl --endpoints https://172.18.18.101:2379 --ca-file tls-setup/certs/ca.pem --cert-file tls-setup/certs/etcd1.pem --key-file tls-setup/certs/etcd1-key.pem'
-etcd3_cmd='etcdctl --endpoints https://172.18.18.101:2379 --cacert tls-setup/certs/ca.pem --cert tls-setup/certs/etcd1.pem --key tls-setup/certs/etcd1-key.pem'
-
-create_etcd_users_and_roles()
-{
-    $etcd_cmd user add root:notGoodPw
-
-    $etcd_cmd user add calico:notGoodPw
-    $etcd_cmd role add calico
-    $etcd_cmd role grant calico -readwrite -path '/calico*'
-    $etcd_cmd user grant calico -roles calico
-
-    $etcd_cmd user add calico-cni:notGoodPw
-    $etcd_cmd role add calico-cni
-    $etcd_cmd role grant calico-cni -readwrite -path '/calico*'
-    $etcd_cmd user grant calico-cni -roles calico-cni
-
-    $etcd_cmd user add testUser:notGoodPw
-    $etcd_cmd role add testRole
-    $etcd_cmd role grant testRole -readwrite -path '/test*'
-    $etcd_cmd user grant testUser -roles testRole
-
-    export ETCDCTL_API=3
-    $etcd3_cmd user add root:notGoodPw
-
-    $etcd3_cmd user add kubetcd:notGoodPw
-    $etcd3_cmd role add kubetcd
-    $etcd3_cmd role grant-permission kubetcd --prefix=true readwrite /registry
-    #$etcd3_cmd role grant-permission kubetcd --prefix=true readwrite registry
-    $etcd3_cmd user grant-role kubetcd kubetcd
-
-    $etcd3_cmd user add testUser:notGoodPw
-    $etcd3_cmd role add testRole
-    $etcd3_cmd role grant-permission testRole --prefix=true readwrite /test
-    $etcd3_cmd role grant-permission testRole --prefix=true readwrite test
-    $etcd3_cmd user grant-role testUser testRole
-
-    $etcd3_cmd auth enable
-    unset ETCDCTL_API
-    # Need both enables, only doing the etcd v3 does not lock down the v2
-    $etcd_cmd auth enable
-}
-
 etcd_test_cmd='etcdctl --endpoints https://172.18.18.101:2379 --ca-file tls-setup/certs/ca.pem --cert-file tls-setup/certs/test.pem --key-file tls-setup/certs/test-key.pem'
 etcd3_test_cmd='etcdctl --endpoints https://172.18.18.101:2379 --cacert tls-setup/certs/ca.pem --cert tls-setup/certs/test.pem --key tls-setup/certs/test-key.pem'
 etcd_calico_cmd='etcdctl --endpoints https://172.18.18.101:2379 --ca-file tls-setup/certs/ca.pem --cert-file tls-setup/certs/calico.pem --key-file tls-setup/certs/calico-key.pem'
 etcd3_k8s_cmd='etcdctl --endpoints https://172.18.18.101:2379 --cacert tls-setup/certs/ca.pem --cert tls-setup/certs/kubernetes.pem --key tls-setup/certs/kubernetes-key.pem'
+etcd_blah_cmd='etcdctl --endpoints https://172.18.18.101:2379 --ca-file tls-setup/certs/ca.pem --cert-file tls-setup/certs/blah.pem --key-file tls-setup/certs/blah-key.pem'
+etcd3_blah_cmd='etcdctl --endpoints https://172.18.18.101:2379 --cacert tls-setup/certs/ca.pem --cert tls-setup/certs/blah.pem --key tls-setup/certs/blah-key.pem'
 check_etcd_perms()
 {
     echo "==Check Test user can't access /calico"
@@ -88,7 +47,10 @@ check_etcd_perms()
     if [ $? -eq 0 ]; then echo "Test user could access /calico when it should not have"; exit 1; fi
     echo "==Check Calico user can access /calico"
     $etcd_calico_cmd ls /calico
+    echo "==Check Blah user can't access /calico"
     if [ $? -ne 0 ]; then echo "Calico user could not access /calico when it should have"; exit 1; fi
+    $etcd_blah_cmd ls /calico
+    if [ $? -eq 0 ]; then echo "Unknown user could access /calico when it should not have"; exit 1; fi
     export ETCDCTL_API=3
     echo "==Check test user can't access (v3)/registry"
     $etcd3_test_cmd get /registry
@@ -96,6 +58,9 @@ check_etcd_perms()
     echo "==Check kubernetes user can access (v3)/registry"
     $etcd3_k8s_cmd get /registry
     if [ $? -ne 0 ]; then echo "K8s user could not access /registry when it should have"; exit 1; fi
+    echo "==Check Blah user can't access (v3)/registry"
+    $etcd3_blah_cmd get /registry
+    if [ $? -eq 0 ]; then echo "Blah user could access /registry when it should not have"; exit 1; fi
     unset ETCDCTL_API
 }
 
@@ -131,7 +96,7 @@ for x in $hosts; do
     if [ $? -ne 0 ]; then echo "Docker not happy on $x"; exit 1; fi
 done
 
-create_etcd_users_and_roles
+./setup_etcd_users_roles.sh
 
 kubectl config set-cluster vagrant-cluster --server=http://172.18.18.101:8080
 kubectl config set-context vagrant-system --cluster=vagrant-cluster
