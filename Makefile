@@ -12,9 +12,9 @@ tls-setup/certs:
 	# Update calico manifest
 	rm -rf tmp
 	mkdir -p tmp
-	cp tls-setup/certs/* tmp/
-	sed -i -e 's/^/    /' tmp/calico*.pem
-	sed -i -e 's/^/    /' tmp/ca.pem
+	cat tls-setup/certs/calico.pem | base64 | sed -e 's/^/    /' tmp/calico.pem
+	cat tls-setup/certs/calico-key.pem | base64 | sed -e 's/^/    /' tmp/calico-key.pem
+	cat tls-setup/certs/ca.pem | base64 | sed -e 's/^/    /' tmp/ca.pem
 	sed -e '/calico-etcd-rbac-key/r./tmp/calico-key.pem' calico.yaml.template > k8s/calico.yaml
 	sed -i -e '/calico-etcd-rbac-cert/r./tmp/calico.pem' k8s/calico.yaml
 	sed -i -e '/calico-etcd-rbac-ca/r./tmp/ca.pem' k8s/calico.yaml

@@ -53,7 +53,8 @@ data:
 # The following contains k8s Secrets for use with a TLS enabled etcd cluster.
 # For information on populating Secrets, see http://kubernetes.io/docs/user-guide/secrets/
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
+type: Opaque
 metadata:
   name: calico-etcd-secrets
   namespace: kube-system
