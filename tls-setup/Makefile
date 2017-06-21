@@ -3,7 +3,10 @@
 CFSSL	= @env PATH=$(GOPATH)/bin:$(PATH) cfssl
 JSON	= env PATH=$(GOPATH)/bin:$(PATH) cfssljson
 
-all: cfssl ca req
+ADDL_CERTS := calico calico-cni calico-k8s-policy
+
+
+all: cfssl ca req $(ADDL_CERTS)
 
 cfssl:
 	go get -u -tags nopkcs11 github.com/cloudflare/cfssl/cmd/cfssl
@@ -45,16 +48,14 @@ req:
 	  -ca-key certs/ca-key.pem \
 	  -config config/ca-config.json \
 	  config/req-k8s.json | $(JSON) -bare certs/kubernetes
+
+.PHONY: $(ADDL_CERTS)
+$(ADDL_CERTS):
 	$(CFSSL) gencert \
 	  -ca certs/ca.pem \
 	  -ca-key certs/ca-key.pem \
 	  -config config/ca-config.json \
-	  config/req-calico.json | $(JSON) -bare certs/calico
-	$(CFSSL) gencert \
-	  -ca certs/ca.pem \
-	  -ca-key certs/ca-key.pem \
-	  -config config/ca-config.json \
-	  config/req-calico-cni.json | $(JSON) -bare certs/calico-cni
+	  config/req-$@.json | $(JSON) -bare certs/$@
 
 
 clean:

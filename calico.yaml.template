@@ -64,9 +64,7 @@ data:
   # This self-hosted install expects three files with the following names.  The values
   # should be base64 encoded strings of the entire contents of each file.
   etcd-key: calico-etcd-rbac-key
-
   etcd-cert: calico-etcd-rbac-cert
-
   etcd-ca: calico-etcd-rbac-ca
 
 ---
@@ -79,9 +77,20 @@ metadata:
   namespace: kube-system
 data:
   etcd-key: calico-cni-etcd-rbac-key
-
   etcd-cert: calico-cni-etcd-rbac-cert
+  etcd-ca: calico-etcd-rbac-ca
 
+---
+
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: calico-k8s-policy-etcd-secrets
+  namespace: kube-system
+data:
+  etcd-key: calico-k8s-policy-etcd-rbac-key
+  etcd-cert: calico-k8s-policy-etcd-rbac-cert
   etcd-ca: calico-etcd-rbac-ca
 
 ---
@@ -318,7 +327,7 @@ spec:
         # Mount in the etcd TLS secrets.
         - name: etcd-certs
           secret:
-            secretName: calico-etcd-secrets
+            secretName: calico-k8s-policy-etcd-secrets
 
 ---
 

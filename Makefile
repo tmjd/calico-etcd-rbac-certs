@@ -3,7 +3,7 @@
 MASTERS ?= 1
 NODES ?= 2
 
-etcd-users := calico calico-cni
+etcd-users := calico calico-cni calico-k8s-policy
 
 all: calico-certs
 	sed -i -e "s/^num_instances=.*$$/num_instances=$$(($(NODES)+$(MASTERS)))/" Vagrantfile
