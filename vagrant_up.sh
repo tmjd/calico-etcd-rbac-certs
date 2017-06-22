@@ -120,7 +120,3 @@ echo "Waiting for skydns pod to be running"
 wait_for_pods_running kube-dns
 
 check_etcd_perms
-
-kubectl run nginx --replicas=2 --image=nginx
-kubectl expose deployment nginx --port=80
-echo "kubectl run access --rm -ti --image busybox /bin/sh"

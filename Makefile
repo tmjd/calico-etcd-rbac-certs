@@ -8,6 +8,7 @@ etcd-users := calico calico-cni calico-k8s-policy
 all: calico-certs
 	sed -i -e "s/^num_instances=.*$$/num_instances=$$(($(NODES)+$(MASTERS)))/" Vagrantfile
 	MASTERS=$(MASTERS) NODES=$(NODES) K8S_CACHED=true ./vagrant_up.sh
+	./simple-policy.sh
 
 tls-setup/certs:
 	rm -rf tmp
