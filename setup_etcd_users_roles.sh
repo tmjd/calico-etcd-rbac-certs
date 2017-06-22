@@ -1,11 +1,13 @@
+#!/bin/bash
+set -e
 
-etcd_cmd='etcdctl --endpoints https://172.18.18.101:2379 --ca-file tls-setup/certs/ca.pem --cert-file tls-setup/certs/etcd1.pem --key-file tls-setup/certs/etcd1-key.pem'
-etcd3_cmd='etcdctl --endpoints https://172.18.18.101:2379 --cacert tls-setup/certs/ca.pem --cert tls-setup/certs/etcd1.pem --key tls-setup/certs/etcd1-key.pem'
+etcd_cmd='etcdctl --endpoints https://172.18.18.101:2379 --ca-file tls-setup/certs/ca.pem --cert-file tls-setup/certs/root.pem --key-file tls-setup/certs/root-key.pem'
+etcd3_cmd='etcdctl --endpoints https://172.18.18.101:2379 --cacert tls-setup/certs/ca.pem --cert tls-setup/certs/root.pem --key tls-setup/certs/root-key.pem'
 
 $etcd_cmd user add root:notGoodPw
 
-#$etcd_cmd role add guest
-#$etcd_cmd role revoke guest -readwrite -path '/*'
+$etcd_cmd role add guest
+$etcd_cmd role revoke guest -readwrite -path '/*'
 
 $etcd_cmd user add calico:notGoodPw
 $etcd_cmd role add calico
@@ -17,6 +19,11 @@ $etcd_cmd role add calico-cni
 $etcd_cmd role grant calico-cni -readwrite -path '/calico*'
 $etcd_cmd user grant calico-cni -roles calico-cni
 
+$etcd_cmd user add calico-k8s-policy:notGoodPw
+$etcd_cmd role add calico-k8s-policy
+$etcd_cmd role grant calico-k8s-policy -readwrite -path '/calico*'
+$etcd_cmd user grant calico-k8s-policy -roles calico-k8s-policy
+
 $etcd_cmd user add testUser:notGoodPw
 $etcd_cmd role add testRole
 $etcd_cmd role grant testRole -readwrite -path '/test*'
@@ -25,7 +32,7 @@ $etcd_cmd user grant testUser -roles testRole
 export ETCDCTL_API=3
 $etcd3_cmd user add root:notGoodPw
 
-$etcd_cmd role add guest
+$etcd3_cmd role add guest
 
 $etcd3_cmd user add kubetcd:notGoodPw
 $etcd3_cmd role add kubetcd
