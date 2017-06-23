@@ -16,13 +16,32 @@ $etcd_cmd user grant calico -roles calico
 
 $etcd_cmd user add calico-cni:notGoodPw
 $etcd_cmd role add calico-cni
-$etcd_cmd role grant calico-cni -readwrite -path '/calico*'
+$etcd_cmd role grant calico-cni -read -path '/calico/v1/ipam*'
+$etcd_cmd role grant calico-cni -readwrite -path '/calico/v1/host*'
+$etcd_cmd role grant calico-cni -readwrite -path '/calico/v1/policy*'
+$etcd_cmd role grant calico-cni -readwrite -path '/calico/ipam/v2*'
 $etcd_cmd user grant calico-cni -roles calico-cni
 
 $etcd_cmd user add calico-k8s-policy:notGoodPw
 $etcd_cmd role add calico-k8s-policy
-$etcd_cmd role grant calico-k8s-policy -readwrite -path '/calico*'
+$etcd_cmd role grant calico-k8s-policy -readwrite -path '/calico/v1/host*'
+$etcd_cmd role grant calico-k8s-policy -readwrite -path '/calico/v1/policy*'
 $etcd_cmd user grant calico-k8s-policy -roles calico-k8s-policy
+
+$etcd_cmd user add calico-node:notGoodPw
+$etcd_cmd role add calico-node
+$etcd_cmd role grant calico-node -readwrite -path '/calico/v1*'
+$etcd_cmd role grant calico-node -readwrite -path '/calico/felix/v1*'
+$etcd_cmd role grant calico-node -readwrite -path '/calico/v1/ipam*'
+$etcd_cmd role grant calico-node -readwrite -path '/calico/ipam/v2*'
+$etcd_cmd role grant calico-node -readwrite -path '/calico/bgp/v1*'
+$etcd_cmd user grant calico-node -roles calico-node
+
+# Only used if kubernetes has `--storage-backend etcd2` on the apiserver
+$etcd_cmd user add kubetcd:notGoodPw
+$etcd_cmd role add kubetcd
+$etcd_cmd role grant kubetcd -readwrite -path '/registry*'
+$etcd_cmd user grant kubetcd -roles kubetcd
 
 $etcd_cmd user add testUser:notGoodPw
 $etcd_cmd role add testRole

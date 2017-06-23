@@ -69,6 +69,25 @@ data:
 
 ---
 
+# The following contains k8s Secrets for use with a TLS enabled etcd cluster.
+# For information on populating Secrets, see http://kubernetes.io/docs/user-guide/secrets/
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: calico-node-etcd-secrets
+  namespace: kube-system
+data:
+  # Populate the following files with etcd TLS configuration if desired, but leave blank if
+  # not using TLS for etcd.
+  # This self-hosted install expects three files with the following names.  The values
+  # should be base64 encoded strings of the entire contents of each file.
+  etcd-key: calico-node-etcd-rbac-key
+  etcd-cert: calico-node-etcd-rbac-cert
+  etcd-ca: calico-etcd-rbac-ca
+
+---
+
 apiVersion: v1
 kind: Secret
 type: Opaque
@@ -196,7 +215,7 @@ spec:
               name: var-run-calico
               readOnly: false
             - mountPath: /calico-secrets
-              name: etcd-certs
+              name: node-etcd-certs
         # This container installs the Calico CNI binaries
         # and CNI network config file on each node.
         - name: install-cni
@@ -241,9 +260,9 @@ spec:
         - name: cni-etcd-certs
           secret:
             secretName: calico-cni-etcd-secrets
-        - name: etcd-certs
+        - name: node-etcd-certs
           secret:
-            secretName: calico-etcd-secrets
+            secretName: calico-node-etcd-secrets
 
 ---
 

@@ -51,6 +51,7 @@ check_etcd_perms()
     if [ $? -ne 0 ]; then echo "Calico user could not access /calico when it should have"; exit 1; fi
     $etcd_blah_cmd ls /calico
     if [ $? -eq 0 ]; then echo "Unknown user could access /calico when it should not have"; exit 1; fi
+    # If version of etcd less than 3.2 is used then the tests here will fail
     export ETCDCTL_API=3
     echo "==Check test user can't access (v3)/registry"
     $etcd3_test_cmd get /registry
