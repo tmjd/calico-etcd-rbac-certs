@@ -1,8 +1,10 @@
 #!/bin/bash
-set -e
+set -ex
 
 etcd_cmd='etcdctl --endpoints https://172.18.18.101:2379 --ca-file tls-setup/certs/ca.pem --cert-file tls-setup/certs/root.pem --key-file tls-setup/certs/root-key.pem'
 etcd3_cmd='etcdctl --endpoints https://172.18.18.101:2379 --cacert tls-setup/certs/ca.pem --cert tls-setup/certs/root.pem --key tls-setup/certs/root-key.pem'
+
+unset ETCDCTL_API
 
 $etcd_cmd user add root:notGoodPw
 
@@ -30,9 +32,10 @@ $etcd_cmd user grant calico-k8s-policy -roles calico-k8s-policy
 
 $etcd_cmd user add calico-node:notGoodPw
 $etcd_cmd role add calico-node
+$etcd_cmd role grant calico-node -readwrite -path '/calico'
+$etcd_cmd role grant calico-node -read -path '/calico*'
 $etcd_cmd role grant calico-node -readwrite -path '/calico/v1*'
 $etcd_cmd role grant calico-node -readwrite -path '/calico/felix/v1*'
-$etcd_cmd role grant calico-node -readwrite -path '/calico/v1/ipam*'
 $etcd_cmd role grant calico-node -readwrite -path '/calico/ipam/v2*'
 $etcd_cmd role grant calico-node -readwrite -path '/calico/bgp/v1*'
 $etcd_cmd user grant calico-node -roles calico-node
@@ -57,6 +60,7 @@ $etcd3_cmd user add kubetcd:notGoodPw
 $etcd3_cmd role add kubetcd
 $etcd3_cmd role grant-permission kubetcd --prefix=true readwrite /registry
 $etcd3_cmd user grant-role kubetcd kubetcd
+$etcd3_cmd user grant-role kubetcd root
 
 $etcd3_cmd user add testUser:notGoodPw
 $etcd3_cmd role add testRole
